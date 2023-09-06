@@ -37,12 +37,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-          "macos-14",
           "ubuntu-latest",
         ]
         python-version: [
           "pypy3.10",
           "pypy3.9",
+          "3.13-dev",
+          "3.12-dev",
+          "3.11-dev",
           "3.13",
           "3.12",
           "3.11",
@@ -70,6 +72,7 @@ jobs:
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
+      if: "!endsWith(matrix.python-version, '-dev')"
       with:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
@@ -77,6 +80,11 @@ jobs:
         cache-dependency-path: |
           ".ci/*.sh"
           "pyproject.toml"
+
+    - uses: deadsnakes/action@v3.1.0
+      if: endsWith(matrix.python-version, '-dev')
+      with:
+        python-version: ${{ matrix.python-version }}
 
     - name: Build system information
       run: python3 .github/workflows/system-info.py
