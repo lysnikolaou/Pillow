@@ -1205,6 +1205,12 @@ font_getvarnames(FontObject *self) {
 
     num_namedstyles = master->num_namedstyles;
     list_names = PyList_New(num_namedstyles);
+
+    int listnames_filled[num_namedstyles];
+    for (int i = 0; i < num_namedstyles; i++) {
+        listnames_filled[i] = 0;
+    }
+
     if (list_names == NULL) {
         FT_Done_MM_Var(library, master);
         return NULL;
@@ -1220,13 +1226,14 @@ font_getvarnames(FontObject *self) {
         }
 
         for (j = 0; j < num_namedstyles; j++) {
-            if (PyList_GetItemRef(list_names, j) != NULL) {
+            if (listnames_filled[j]) {
                 continue;
             }
 
             if (master->namedstyle[j].strid == name.name_id) {
                 list_name = Py_BuildValue("y#", name.string, name.string_len);
                 PyList_SetItem(list_names, j, list_name);
+                listnames_filled[j] = 1;
                 break;
             }
         }
