@@ -1206,9 +1206,13 @@ font_getvarnames(FontObject *self) {
     num_namedstyles = master->num_namedstyles;
     list_names = PyList_New(num_namedstyles);
 
-    int listnames_filled[num_namedstyles];
+    int *list_names_filled = PyMem_Malloc(num_namedstyles * sizeof(int));
+    if (list_names_filled == NULL) {
+        return PyErr_NoMemory();
+    }
+
     for (int i = 0; i < num_namedstyles; i++) {
-        listnames_filled[i] = 0;
+        list_names_filled[i] = 0;
     }
 
     if (list_names == NULL) {
@@ -1226,14 +1230,14 @@ font_getvarnames(FontObject *self) {
         }
 
         for (j = 0; j < num_namedstyles; j++) {
-            if (listnames_filled[j]) {
+            if (list_names_filled[j]) {
                 continue;
             }
 
             if (master->namedstyle[j].strid == name.name_id) {
                 list_name = Py_BuildValue("y#", name.string, name.string_len);
                 PyList_SetItem(list_names, j, list_name);
-                listnames_filled[j] = 1;
+                list_names_filled[j] = 1;
                 break;
             }
         }
